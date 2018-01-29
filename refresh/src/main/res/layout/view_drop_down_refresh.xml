@@ -3,7 +3,7 @@
     android:id="@+id/relative_drop_down_parent"
     android:layout_width="match_parent"
     android:layout_height="70dp"
-    android:background="@android:color/white"
+    android:background="@android:color/holo_red_dark"
     android:paddingBottom="10dp">
 
     <RelativeLayout

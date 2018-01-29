@@ -9,7 +9,7 @@
         android:layout_height="350dp"
         android:gravity="center"
         android:textColor="@color/colorPrimaryText"
-        android:text="Hello World!"
-        android:background="@android:color/white"/>
+        android:background="@android:color/holo_red_dark"
+        android:text="Hello World!"/>
 
 </com.tuacy.refresh.view.RefreshLayout>

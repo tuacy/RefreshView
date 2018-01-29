@@ -23,6 +23,8 @@ import com.tuacy.refresh.R;
 
 public class RefreshLayout extends ViewGroup {
 
+	private static final String TAG = "RefreshLayout";
+
 	/**
 	 * 对应下拉刷新的View
 	 */
@@ -121,38 +123,57 @@ public class RefreshLayout extends ViewGroup {
 	 */
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		measureChildren(widthMeasureSpec, heightMeasureSpec);
+		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+		for (int index = 0; index < getChildCount(); index++) {
+			final View child = getChildAt(index);
+			final LayoutParams lp = child.getLayoutParams();
+			if (index == 0 || index == 2) {
+				final int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY);
+				final int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
+																	   getPaddingTop() + getPaddingBottom(), lp.height);
+				child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+			} else if (index == 1) {
+				measureChild(child, widthMeasureSpec, heightMeasureSpec);
+			}
+		}
 		if (mDropDownRefreshView != null) {
 			mDropDownViewHeight = mDropDownRefreshView.getMeasuredHeight();
+			Log.d(TAG, "measure child drop down width = " + mDropDownRefreshView.getMeasuredWidth() + " height = " + mDropDownRefreshView.getMeasuredHeight());
 		}
 		if (mPullUpLoadView != null) {
 			mPullUpViewHeight = mPullUpLoadView.getMeasuredHeight();
+			Log.d(TAG, "measure child pull up width = " + mPullUpLoadView.getMeasuredWidth() + " height = " + mPullUpLoadView.getMeasuredHeight());
+
 		}
 		if (getChildCount() > 1) {
 			mContentView = getChildAt(1);
+			Log.d(TAG, "measure child content width = " + mContentView.getMeasuredWidth() + " height = " + mContentView.getMeasuredHeight());
+
 			setMeasuredDimension(mContentView.getMeasuredWidth() + getPaddingLeft() + getPaddingRight(),
 								 mContentView.getMeasuredHeight() + getPaddingTop() + getPaddingBottom());
 		} else {
 			setMeasuredDimension(0, 0);
 		}
-
+		Log.d(TAG, "width = " + getMeasuredWidth() + " height = " + getMeasuredHeight());
 	}
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
+		Log.d(TAG, "l = " + l + " t = " + t + " r = " + r + " b = " + b);
 		for (int i = 0; i < getChildCount(); i++) {
 			View child = getChildAt(i);
 			if (child.getVisibility() != View.GONE) {
+				Log.d(TAG, "index = " + i);
 				if (i == 0) {
 					//drop down refresh view 把drop down view 放到屏幕顶部外面去
-					child.layout(0, 0 - child.getMeasuredHeight(), child.getMeasuredWidth(), 0);
+					child.layout(l, t - child.getMeasuredHeight(), r, t);
 				} else if (i == 1) {
 					//content view
-					child.layout(getPaddingLeft(), getPaddingTop(), getPaddingLeft() + child.getMeasuredWidth(),
-								 getPaddingTop() + child.getMeasuredHeight());
+					child.layout(l + getPaddingLeft(), t + getPaddingTop(), l + getPaddingLeft() + child.getMeasuredWidth(),
+								 t + getPaddingTop() + child.getMeasuredHeight());
 				} else {
 					//pull up view 把pull up view 放到屏幕顶部外面去
-					child.layout(0, getMeasuredHeight(), child.getMeasuredWidth(), getMeasuredHeight() + child.getMeasuredHeight());
+					child.layout(l, b, l + child.getMeasuredWidth(), b + child.getMeasuredHeight());
 				}
 			}
 		}
