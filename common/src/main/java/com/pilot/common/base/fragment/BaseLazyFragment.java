@@ -7,7 +7,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.pilot.common.log.PilotLog;
+import com.pilot.common.log.TuacyLog;
 import com.trello.rxlifecycle.components.RxFragment;
 
 import java.lang.reflect.Field;
@@ -134,7 +134,7 @@ public abstract class BaseLazyFragment extends RxFragment {
 			}
 			ft.show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseLazyFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
+			TuacyLog.e(BaseLazyFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
 		}
 	}
 
@@ -150,7 +150,7 @@ public abstract class BaseLazyFragment extends RxFragment {
 			}
 			ft.replace(layoutId, f, clz.getName()).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseLazyFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
+			TuacyLog.e(BaseLazyFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
 					   e.getMessage());
 		}
 	}
@@ -168,7 +168,7 @@ public abstract class BaseLazyFragment extends RxFragment {
 			f.setArguments(args);
 			ft.replace(layoutId, f, clz.getName()).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseLazyFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
+			TuacyLog.e(BaseLazyFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
 					   e.getMessage());
 		}
 	}
@@ -182,7 +182,7 @@ public abstract class BaseLazyFragment extends RxFragment {
 			Fragment f = clz.newInstance();
 			ft.add(layoutId, f, clz.getName()).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseLazyFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
+			TuacyLog.e(BaseLazyFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
 					   e.getMessage());
 		}
 	}
@@ -196,7 +196,7 @@ public abstract class BaseLazyFragment extends RxFragment {
 			Fragment f = clz.newInstance();
 			ft.add(layoutId, f, clz.getName()).setCustomAnimations(enterAnim, exitAnim).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseLazyFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
+			TuacyLog.e(BaseLazyFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
 					   e.getMessage());
 		}
 	}

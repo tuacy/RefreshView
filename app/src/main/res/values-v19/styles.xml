@@ -2,7 +2,7 @@
 
     <style name="RefreshTheme" parent="Refresh.Base">
         <!-- since API 19-->
-        <item name="android:windowTranslucentStatus">true</item>
+        <!--<item name="android:windowTranslucentStatus">true</item>-->
     </style>
 
 </resources>

@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.pilot.common.log.PilotLog;
+import com.pilot.common.log.TuacyLog;
 import com.trello.rxlifecycle.components.RxFragment;
 
 public abstract class BaseFragment extends RxFragment {
@@ -64,7 +64,7 @@ public abstract class BaseFragment extends RxFragment {
 			}
 			ft.show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
+			TuacyLog.e(BaseFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
 		}
 	}
 
@@ -78,7 +78,7 @@ public abstract class BaseFragment extends RxFragment {
 			}
 			ft.replace(layoutId, f, clz.getName()).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
+			TuacyLog.e(BaseFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
 		}
 	}
 
@@ -93,7 +93,7 @@ public abstract class BaseFragment extends RxFragment {
 			f.setArguments(args);
 			ft.replace(layoutId, f, clz.getName()).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
+			TuacyLog.e(BaseFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
 		}
 	}
 
@@ -104,7 +104,7 @@ public abstract class BaseFragment extends RxFragment {
 			Fragment f = clz.newInstance();
 			ft.add(layoutId, f, clz.getName()).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
+			TuacyLog.e(BaseFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
 		}
 	}
 
@@ -115,7 +115,7 @@ public abstract class BaseFragment extends RxFragment {
 			Fragment f = clz.newInstance();
 			ft.add(layoutId, f, clz.getName()).setCustomAnimations(enterAnim, exitAnim).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
+			TuacyLog.e(BaseFragment.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e, e.getMessage());
 		}
 	}
 

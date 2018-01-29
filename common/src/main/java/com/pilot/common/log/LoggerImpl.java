@@ -290,7 +290,7 @@ public class LoggerImpl implements Logger {
 		final int MIN_STACK_OFFSET = 2;
 		int count = MIN_STACK_OFFSET;
 		for (int i = MIN_STACK_OFFSET; i < trace.length; i++) {
-			if (PilotLog.class.getName().equals(trace[i].getClassName()) || LoggerImpl.class.getName().equals(trace[i].getClassName())) {
+			if (TuacyLog.class.getName().equals(trace[i].getClassName()) || LoggerImpl.class.getName().equals(trace[i].getClassName())) {
 				count++;
 			} else {
 				return count;

@@ -5,7 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.pilot.common.log.PilotLog;
+import com.pilot.common.log.TuacyLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,6 +123,6 @@ public abstract class BaseApplication extends Application
 				}
 			}
 		}
-		PilotLog.threadInfo(true).e("onAppCrash", ex, log);
+		TuacyLog.threadInfo(true).e("onAppCrash", ex, log);
 	}
 }

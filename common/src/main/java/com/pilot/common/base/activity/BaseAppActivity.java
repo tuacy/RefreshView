@@ -13,7 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.pilot.common.R;
-import com.pilot.common.log.PilotLog;
+import com.pilot.common.log.TuacyLog;
 
 @SuppressLint("Registered")
 public class BaseAppActivity extends AppCompatActivity {
@@ -87,7 +87,7 @@ public class BaseAppActivity extends AppCompatActivity {
 			}
 			ft.show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseAppActivity.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
+			TuacyLog.e(BaseAppActivity.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
 					   e.getMessage());
 		}
 	}
@@ -102,7 +102,7 @@ public class BaseAppActivity extends AppCompatActivity {
 			}
 			ft.replace(layoutId, f, clz.getName()).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseAppActivity.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
+			TuacyLog.e(BaseAppActivity.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
 					   e.getMessage());
 		}
 	}
@@ -118,7 +118,7 @@ public class BaseAppActivity extends AppCompatActivity {
 			f.setArguments(args);
 			ft.replace(layoutId, f, clz.getName()).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseAppActivity.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
+			TuacyLog.e(BaseAppActivity.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
 					   e.getMessage());
 		}
 	}
@@ -130,7 +130,7 @@ public class BaseAppActivity extends AppCompatActivity {
 			Fragment f = clz.newInstance();
 			ft.add(layoutId, f, clz.getName()).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseAppActivity.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
+			TuacyLog.e(BaseAppActivity.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
 					   e.getMessage());
 		}
 	}
@@ -142,7 +142,7 @@ public class BaseAppActivity extends AppCompatActivity {
 			Fragment f = clz.newInstance();
 			ft.add(layoutId, f, clz.getName()).setCustomAnimations(enterAnim, exitAnim).show(f).commit();
 		} catch (Exception e) {
-			PilotLog.e(BaseAppActivity.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
+			TuacyLog.e(BaseAppActivity.class, e, "Cannot get new instance of %s . Throw: %s. Message: %s", clz.getName(), e,
 					   e.getMessage());
 		}
 	}

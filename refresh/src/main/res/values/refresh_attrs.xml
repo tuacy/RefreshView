@@ -1,0 +1,10 @@
+<resources>
+    <declare-styleable name="RefreshLayout">
+        <!-- 下拉 -->
+        <attr name="refresh_drop_down_refresh_enable" format="boolean" />
+        <!-- 上拉 -->
+        <attr name="refresh_pull_up_load_enable" format="boolean" />
+        <!-- 阻尼系数 -->
+        <attr name="refresh_pull_offset_radio" format="float" />
+    </declare-styleable>
+</resources>

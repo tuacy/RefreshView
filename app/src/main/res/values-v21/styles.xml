@@ -3,6 +3,6 @@
     <style name="RefreshTheme" parent="Refresh.Base">
         <!-- since API 21-->
         <item name="android:navigationBarColor">@color/colorNavigationBar</item>
-        <item name="android:windowTranslucentStatus">true</item>
+        <!--<item name="android:windowTranslucentStatus">true</item>-->
     </style>
 </resources>

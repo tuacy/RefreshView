@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import com.pilot.common.log.printer.Printer;
 
 
-public class PilotLog {
+public class TuacyLog {
 
 	private static LoggerImpl mLogger = new LoggerImpl();
 

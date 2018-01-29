@@ -5,7 +5,7 @@ import android.content.res.AssetManager;
 
 
 import com.pilot.common.base.properties.BaseProperties;
-import com.pilot.common.log.PilotLog;
+import com.pilot.common.log.TuacyLog;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +32,7 @@ public abstract class BasePropertiesConfig implements BaseProperties {
 			in = assetManager.open(getPropertyFileName());
 			mProps.load(in);
 		} catch (IOException e) {
-			PilotLog.e(BasePropertiesConfig.class, e, "Cannot open: %s", getPropertyFileName());
+			TuacyLog.e(BasePropertiesConfig.class, e, "Cannot open: %s", getPropertyFileName());
 		} finally {
 			if (in != null) {
 				try {
