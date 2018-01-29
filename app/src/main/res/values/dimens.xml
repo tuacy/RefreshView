@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+选取尺寸参考：
+顶部栏高度：24dp
+AppBar最小高度：56dp
+底部导航栏高度：48dp
+悬浮按钮尺寸：56x56dp/40x40dp
+用户头像尺寸：64x64dp/40x40dp
+小图标点击区域：48x48dp
+侧边抽屉到屏幕右边的距离：56dp
+卡片间距：8dp
+分隔线上下留白：8dp
+大多元素的留白距离：16dp
+屏幕左右对齐基线：16dp
+文字左侧对齐基线：72dp
+
+注意56dp这个数字，许多尺寸可变的控件，比如对话框、菜单等，宽度都可以按56的整数倍来设计
+-->
+
+    <!-- 纲要 -->
+    <dimen name="text_size_flag">28sp</dimen>
+    <dimen name="text_size_headline">24sp</dimen>
+    <!-- ActionBar标题 -->
+    <dimen name="text_size_title">20sp</dimen>
+    <dimen name="text_size_small_title">18sp</dimen>
+    <!-- 次要标题 -->
+    <dimen name="text_size_subhead">16sp</dimen>
+    <!-- list view item -->
+    <dimen name="text_size_list_view">16sp</dimen>
+
+    <dimen name="text_size_normal">16sp</dimen>
+    <!-- 菜单 -->
+    <dimen name="text_size_menu">14sp</dimen>
+    <!-- 正文 -->
+    <dimen name="text_size_body">14sp</dimen>
+    <!-- 按钮 -->
+    <dimen name="text_size_button">14sp</dimen>
+    <!-- 小字提示 -->
+    <dimen name="text_size_caption">12sp</dimen>
+    <!-- 超小字提示 -->
+    <dimen name="text_size_mini">10sp</dimen>
+
+    <!-- margin -->
+    <dimen name="margin_little">2dp</dimen>
+    <dimen name="margin_tiny">4dp</dimen>
+    <dimen name="margin_min">6dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_mini">12dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="margin_normal">24dp</dimen>
+    <dimen name="margin_big">32dp</dimen>
+    <dimen name="margin_super">64dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+
+    <!-- padding -->
+    <dimen name="padding_tiny">4dp</dimen>
+    <dimen name="padding_6dp">6dp</dimen>
+    <dimen name="padding_small">8dp</dimen>
+    <dimen name="padding_mini">12dp</dimen>
+    <dimen name="padding_medium">16dp</dimen>
+
+    <!-- elevation -->
+    <dimen name="elevation_dialog">24dp</dimen>
+    <dimen name="elevation_picker">24dp</dimen>
+    <dimen name="elevation_nav_drawer">16dp</dimen>
+    <dimen name="elevation_bottom_sheet">16dp</dimen>
+    <dimen name="elevation_float_action_btn_press">12dp</dimen>
+    <dimen name="elevation_popup">10dp</dimen>
+    <dimen name="elevation_sub_menu">9dp</dimen>
+    <dimen name="elevation_menu">8dp</dimen>
+    <dimen name="elevation_card">8dp</dimen>
+    <dimen name="elevation_raised_btn">8dp</dimen>
+    <dimen name="elevation_float_action_btn">6dp</dimen>
+    <dimen name="elevation_snack_bar">6dp</dimen>
+    <dimen name="elevation_app_bar">4dp</dimen>
+    <dimen name="elevation_search_bar">3dp</dimen>
+    <dimen name="elevation_switch">1dp</dimen>
+
+    <!-- card corner radius -->
+    <dimen name="card_corner_radius_tiny">2dp</dimen>
+    <dimen name="card_corner_radius_small">3dp</dimen>
+    <dimen name="card_corner_radius_normal">8dp</dimen>
+
+    <!-- element space -->
+    <dimen name="element_space_tiny">4dp</dimen>
+    <dimen name="element_space_normal">6dp</dimen>
+    <dimen name="element_space_small">8dp</dimen>
+    <dimen name="element_space_medium">16dp</dimen>
+
+    <!-- space -->
+    <dimen name="space_tiny">4dp</dimen>
+
+    <!-- divide -->
+    <dimen name="divide_height">1dp</dimen>
+    <dimen name="divide_height_2">2dp</dimen>
+
+    <dimen name="main_bottom_tab_height">48dp</dimen>
+    <dimen name="main_fragment_content_padding_bottom">56dp</dimen>
+    <dimen name="main_drawer_width">264dp</dimen>
+    <dimen name="title_bar_height">42dp</dimen>
+
+    <!-- item -->
+    <dimen name="item_tiny">32dp</dimen>
+    <dimen name="item_small">40dp</dimen>
+    <dimen name="item_normal">48dp</dimen>
+
+    <dimen name="item_height_normal">40dp</dimen>
+    <dimen name="item_draw_menu">48dp</dimen>
+    <dimen name="item_height_big">56dp</dimen>
+    <dimen name="filter_bar_height">40dp</dimen>
+    <dimen name="time_bar_height">40dp</dimen>
+
+    <!-- login -->
+    <dimen name="login_head_icon_top">80dp</dimen>
+    <dimen name="login_head_icon_width">68dp</dimen>
+    <dimen name="login_head_icon_height">68dp</dimen>
+    <dimen name="login_user_name_top">50dp</dimen>
+    <dimen name="login_edit_icon_width">24dp</dimen>
+    <dimen name="login_edit_icon_height">24dp</dimen>
+    <dimen name="login_edit_text_height">36dp</dimen>
+    <dimen name="login_button_height">36dp</dimen>
+    <dimen name="stroke_width">1dp</dimen>
+
+    <!-- 首页 -->
+    <dimen name="home_survey_page_height">220dp</dimen>
+
+    <!-- 排名 -->
+    <dimen name="ranking_view_height">15dp</dimen>
+
+    <!-- 遥测量 -->
+    <dimen name="line_chart_layout_height">200dp</dimen>
+    <dimen name="line_chart_layout_height_1">250dp</dimen>
+
+    <dimen name="title_tab_width">84dp</dimen>
+    <dimen name="sub_title_tab_width">120dp</dimen>
+
+    <!--仪表-->
+    <dimen name="tab_layout_height">28dp</dimen>
+    <dimen name="tab_width">80dp</dimen>
+
+    <!-- about -->
+    <dimen name="about_logo_width">100dp</dimen>
+    <dimen name="about_logo_height">100dp</dimen>
+    <dimen name="about_logo_margin_top">76dp</dimen>
+
+    <!-- date picker -->
+    <dimen name="date_picker_title_height">36dp</dimen>
+    <dimen name="date_picker_select_button_width">80dp</dimen>
+    <dimen name="date_picker_select_button_height">40dp</dimen>
+    <dimen name="date_wheel_picker_width">70dp</dimen>
+    <dimen name="time_wheel_picker_width">50dp</dimen>
+    <dimen name="wheel_picker_interval">8dp</dimen>
+
+    <dimen name="pie_chart_radius">80dp</dimen>
+    <dimen name="pie_chart_height">210dp</dimen>
+    <dimen name="pie_out_ring_width">15dp</dimen>
+    <dimen name="pie_in_normal_ring_width">30dp</dimen>
+    <dimen name="pie_in_select_ring_width">40dp</dimen>
+    <dimen name="pie_space_ring_width">20dp</dimen>
+
+    <dimen name="ai_detail_item_fixed_column_width">95dp</dimen>
+    <dimen name="ai_detail_item_slide_column_width">95dp</dimen>
+
+</resources>

@@ -1,0 +1,73 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="RefreshTheme" parent="Refresh.Base" />
+
+    <style name="Refresh.Base" parent="Theme.AppCompat">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <!--&lt;!&ndash; 转场动画 &ndash;&gt;-->
+        <!--<item name="android:windowAnimationStyle">@style/Animation.Activity.Translucent.Style</item>-->
+
+        <!-- Actionbar背景色 -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+
+        <!-- 状态栏颜色 -->
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+
+        <!-- EditText编辑时, RadioButton选中, CheckBox等选中时的颜色 -->
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- 标题以及溢出菜单文字颜色 -->
+        <item name="android:textColorPrimary">@color/colorPrimaryText</item>
+        <item name="android:textColorSecondary">@color/colorSecondaryText</item>
+
+        <item name="android:textSize">@dimen/text_size_body</item>
+
+        <!--Window color-->
+        <item name="android:windowContentOverlay">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/colorActivity</item>
+        <item name="android:windowIsTranslucent">true</item>
+
+    </style>
+
+    <style name="RefreshTheme.NotTranslucent">
+        <item name="android:windowIsTranslucent">false</item>
+    </style>
+
+    <style name="SplashTheme" parent="RefreshTheme">
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowBackground">@drawable/bg_splash</item>
+    </style>
+
+    <style name="Dialog" parent="@android:style/Theme.Holo.Light.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+    <style name="NoTitleDialog" parent="Dialog">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="TitleBarImage">
+        <item name="android:layout_width">@dimen/title_bar_height</item>
+        <item name="android:layout_height">@dimen/title_bar_height</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:background">@drawable/ripple_circle</item>
+    </style>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+
+</resources>
