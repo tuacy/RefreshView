@@ -3,7 +3,7 @@
     android:id="@+id/relative_drop_down_parent"
     android:layout_width="match_parent"
     android:layout_height="70dp"
-    android:background="@android:color/holo_red_dark"
+    android:background="@android:color/holo_red_light"
     android:paddingBottom="10dp">
 
     <RelativeLayout
@@ -24,8 +24,7 @@
         <ProgressBar
             android:id="@+id/progress_drop_down_refreshing"
             android:layout_width="@dimen/refresh_progress_width"
-            android:layout_height="@dimen/refresh_progress_height"
-            android:visibility="gone" />
+            android:layout_height="@dimen/refresh_progress_height" />
     </RelativeLayout>
 
     <ImageView

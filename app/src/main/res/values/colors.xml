@@ -7,8 +7,8 @@
     <color name="colorNavigationBar">#2293e9</color>
     <color name="colorDivider">#ebebeb</color>
     <color name="colorDividerSecond">#99e3ff</color>
-    <color name="colorPrimaryText">#7c7c7c</color>
-    <color name="colorSecondaryText">#ffffff</color>
+    <color name="colorPrimaryText">#ffffff</color>
+    <color name="colorSecondaryText">#7c7c7c</color>
     <color name="colorActivity">#f4f4f4</color>
     <color name="colorHint">#c7c7c7</color>
     <color name="colorDisable">#afaca6</color>

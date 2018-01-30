@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">refresh</string>
     <string name="refresh_view_drop_down_refresh">下拉刷新</string>
-    <string name="refresh_view_release_refresh">释放刷新数据</string>
+    <string name="refresh_view_release_refresh">释放刷新</string>
     <string name="refresh_view_refreshing">正在刷新…</string>
     <string name="refresh_view_loading">正在加载…</string>
     <string name="refresh_view_load_complete">加载完成</string>

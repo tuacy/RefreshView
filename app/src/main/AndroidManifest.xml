@@ -10,13 +10,30 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/RefreshTheme">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:label="上拉刷新下拉加载">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".module.text.TextRefreshActivity"
+            android:screenOrientation="portrait"
+            android:label="TextView 上拉刷新下拉加载" />
+
+        <activity
+            android:name=".module.list.ListRefreshActivity"
+            android:screenOrientation="portrait"
+            android:label="ListView 上拉刷新下拉加载" />
+
+        <activity
+            android:name=".module.recycler.RecyclerRefreshActivity"
+            android:screenOrientation="portrait"
+            android:label="RecyclerView 上拉刷新下拉加载" />
     </application>
 
 </manifest>

@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.tuacy.refresh.view.RefreshLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <TextView
+    <Button
+        android:id="@+id/button_text_view_refresh"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
-        android:gravity="center"
-        android:textColor="@color/colorPrimaryText"
-        android:background="@android:color/holo_red_dark"
-        android:text="Hello World!"/>
+        android:layout_height="wrap_content"
+        android:text="TextView 上拉下来刷新"
+        android:textAllCaps="false" />
 
-</com.tuacy.refresh.view.RefreshLayout>
+    <Button
+        android:id="@+id/button_list_view_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ListView 上拉下来刷新"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/button_recycler_view_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="RecyclerView 上拉下来刷新"
+        android:textAllCaps="false" />
+
+</LinearLayout>

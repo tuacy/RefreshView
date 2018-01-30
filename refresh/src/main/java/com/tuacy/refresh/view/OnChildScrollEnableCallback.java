@@ -8,7 +8,7 @@ public interface OnChildScrollEnableCallback {
 	/**
 	 * 是否可以下拉
 	 */
-	boolean canChildDropdown(RefreshLayout parent, View target);
+	boolean canChildDropDown(RefreshLayout parent, View target);
 
 	/**
 	 * 是否可以上拉
