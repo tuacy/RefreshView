@@ -196,7 +196,7 @@ public class RefreshLayout extends ViewGroup {
 
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
-		if (mRefreshing || mLoading) {
+		if (mRefreshing || mLoading || mReadyRefreshing || mReadyLoading) {
 			return false;
 		}
 		final int action = ev.getAction();
