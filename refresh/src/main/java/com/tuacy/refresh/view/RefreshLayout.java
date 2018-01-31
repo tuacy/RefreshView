@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.ListViewCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.tuacy.refresh.R;
 
 /**
  * 下拉刷新，上拉加载控件
+ * 1. RefreshLayout里面会限制三个子View:下拉刷新view、内容view、 加载更多view
  */
 
 public class RefreshLayout extends ViewGroup {
@@ -97,6 +99,10 @@ public class RefreshLayout extends ViewGroup {
 	 * 是否self控制范围之内
 	 */
 	private boolean                     mInControl;
+	/**
+	 * 没有更多数据
+	 */
+	private boolean                     mNoMoreData;
 
 	public RefreshLayout(Context context) {
 		this(context, null);
@@ -124,6 +130,7 @@ public class RefreshLayout extends ViewGroup {
 		//添加下拉加载对应的View
 		mDropDownRefreshView = new SimpleDropDownRefreshView(getContext());
 		addDropDownRefreshView(mDropDownRefreshView);
+		//添加上拉加载对应的View
 		getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 
 			@Override
@@ -135,6 +142,7 @@ public class RefreshLayout extends ViewGroup {
 				getViewTreeObserver().removeOnGlobalLayoutListener(this);
 			}
 		});
+		//变量初始化
 		mScroller = new OverScroller(getContext(), new LinearInterpolator());
 		mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 		mMaximumVelocity = ViewConfiguration.get(getContext()).getScaledMaximumFlingVelocity();
@@ -146,15 +154,20 @@ public class RefreshLayout extends ViewGroup {
 	}
 
 	/**
-	 * 这里高度，我们直接用Content View 的高度
+	 * 1. 刷新view的宽度直接用父layout的宽度。
+	 * 2. 内容view正常测量。
+	 * 3. 加载view的宽度直接用父layout的宽度。
 	 */
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		if (getChildCount() < 2) {
+			throw new IllegalArgumentException("*** in layout xml you should set content view ***");
+		}
 		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
 		for (int index = 0; index < getChildCount(); index++) {
 			final View child = getChildAt(index);
-			final LayoutParams lp = child.getLayoutParams();
 			if (index == 0 || index == 2) {
+				final LayoutParams lp = child.getLayoutParams();
 				final int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY);
 				final int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec, getPaddingTop() + getPaddingBottom(), lp.height);
 				child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
@@ -162,28 +175,29 @@ public class RefreshLayout extends ViewGroup {
 				measureChild(child, widthMeasureSpec, heightMeasureSpec);
 			}
 		}
-		if (getChildCount() > 1) {
-			mContentView = getChildAt(1);
-			setMeasuredDimension(mContentView.getMeasuredWidth() + getPaddingLeft() + getPaddingRight(),
-								 mContentView.getMeasuredHeight() + getPaddingTop() + getPaddingBottom());
-		} else {
-			setMeasuredDimension(0, 0);
-		}
+		mContentView = getChildAt(1);
+		setMeasuredDimension(mContentView.getMeasuredWidth() + getPaddingLeft() + getPaddingRight(),
+							 mContentView.getMeasuredHeight() + getPaddingTop() + getPaddingBottom());
 	}
 
+	/**
+	 * 1. 刷新view显示在屏幕之上
+	 * 2. 内容view正常显示
+	 * 3. 加载view显示在屏幕之下
+	 */
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		for (int i = 0; i < getChildCount(); i++) {
 			View child = getChildAt(i);
 			if (child.getVisibility() != View.GONE) {
 				if (i == 0) {
-					child.layout(l, t - child.getMeasuredHeight(), r, t);
+					child.layout(0, 0 - child.getMeasuredHeight(), child.getMeasuredWidth(), 0);
 				} else if (i == 1) {
 					//content view
-					child.layout(l + getPaddingLeft(), t + getPaddingTop(), l + getPaddingLeft() + child.getMeasuredWidth(),
-								 t + getPaddingTop() + child.getMeasuredHeight());
+					child.layout(getPaddingLeft(), getPaddingTop(), getPaddingLeft() + child.getMeasuredWidth(),
+								 getPaddingTop() + child.getMeasuredHeight());
 				} else {
-					child.layout(l, b, l + child.getMeasuredWidth(), b + child.getMeasuredHeight());
+					child.layout(0, getMeasuredHeight(), child.getMeasuredWidth(), getMeasuredHeight() + child.getMeasuredHeight());
 				}
 			}
 		}
@@ -211,7 +225,9 @@ public class RefreshLayout extends ViewGroup {
 				break;
 			case MotionEvent.ACTION_MOVE:
 				final float yDiff = currentY - mPreviousDispatchY;
-				if ((mDropDownRefreshEnable || mPullUpLoadEnable) && getScrollY() == 0 && !mInControl && isResetMotionEventContent(yDiff)) {
+				if ((mDropDownRefreshEnable || mPullUpLoadEnable) && getScrollY() == 0 && !mInControl &&
+					shouldResetMotionEventChild(yDiff)) {
+					Log.d(TAG, "child reset");
 					ev.setAction(MotionEvent.ACTION_CANCEL);
 					MotionEvent eventDown = MotionEvent.obtain(ev);
 					dispatchTouchEvent(ev);
@@ -300,15 +316,20 @@ public class RefreshLayout extends ViewGroup {
 				mInControl = true;
 				return true;
 			case MotionEvent.ACTION_MOVE:
-				final float yDiff = currentY - mPreviousY;
-				if (isResetMotionEventSelf(yDiff / mOffsetRadio)) {
-					scrollTo(0, 0);
-					event.setAction(MotionEvent.ACTION_DOWN);
-					dispatchTouchEvent(event);
-					mInControl = false;
-				} else {
-					offset((int) (yDiff / mOffsetRadio));
-					mInControl = true;
+				final int yDiff = (int) (currentY - mPreviousY);
+				if (Math.abs(yDiff) > mTouchSlop) {
+					final int yDiffAdapter = (int) (yDiff / mOffsetRadio);
+					if (shouldResetMotionEventSelf(yDiffAdapter)) {
+						scrollTo(0, 0);
+						event.setAction(MotionEvent.ACTION_DOWN);
+						dispatchTouchEvent(event);
+						mInControl = false;
+					} else {
+						if (canOffset(yDiffAdapter)) {
+							offset(yDiffAdapter);
+						}
+						mInControl = true;
+					}
 				}
 				mPreviousY = currentY;
 				break;
@@ -328,10 +349,11 @@ public class RefreshLayout extends ViewGroup {
 				int scrollOffset = getScrollY();
 				if (scrollOffset < 0 && mDropDownRefreshEnable && mDropDownRefreshView != null) {
 					//下拉刷新
-					if (Math.abs(scrollOffset) > mDropDownRefreshView.getMeasuredHeight()) {
+					IDropDownRefreshView refreshViewInterface = (IDropDownRefreshView) mDropDownRefreshView;
+					if (Math.abs(scrollOffset) > refreshViewInterface.getReleaseRefreshDistance()) {
 						//释放刷新(达到了刷新的条件)
 						mScroller.startScroll(0, scrollOffset, 0,
-											  Math.abs(Math.abs(scrollOffset) - mDropDownRefreshView.getMeasuredHeight()));
+											  Math.abs(Math.abs(scrollOffset) - refreshViewInterface.getReleaseRefreshDistance()));
 						mReadyRefreshing = true;
 						invalidate();
 					} else {
@@ -341,16 +363,23 @@ public class RefreshLayout extends ViewGroup {
 					}
 				}
 				if (scrollOffset > 0 && mPullUpLoadEnable && mPullUpLoadView != null) {
+					IPullUpLoadView pullUpLoadInterface = (IPullUpLoadView) mPullUpLoadView;
 					//上拉加载
-					if (Math.abs(scrollOffset) > mPullUpLoadView.getMeasuredHeight()) {
-						//释放加载更多(达到了加载更多的条件)
-						mScroller.startScroll(0, scrollOffset, 0, -Math.abs(Math.abs(scrollOffset) - mPullUpLoadView.getMeasuredHeight()));
-						mReadyLoading = true;
-						invalidate();
-					} else {
-						//上拉加载更多(还没达到加载更多的条件)
+					if (mNoMoreData) {
 						mScroller.startScroll(0, scrollOffset, 0, -scrollOffset);
 						invalidate();
+					} else {
+						if (Math.abs(scrollOffset) > pullUpLoadInterface.getReleaseLoadDistance()) {
+							//释放加载更多(达到了加载更多的条件)
+							mScroller.startScroll(0, scrollOffset, 0,
+												  -Math.abs(Math.abs(scrollOffset) - pullUpLoadInterface.getReleaseLoadDistance()));
+							mReadyLoading = true;
+							invalidate();
+						} else {
+							//上拉加载更多(还没达到加载更多的条件)
+							mScroller.startScroll(0, scrollOffset, 0, -scrollOffset);
+							invalidate();
+						}
 					}
 				}
 				mInControl = false;
@@ -363,13 +392,13 @@ public class RefreshLayout extends ViewGroup {
 	@Override
 	public void scrollTo(int x, int y) {
 		super.scrollTo(x, y);
-		updateState();
+		dealScrollDistance();
 	}
 
 	@Override
 	public void scrollBy(int x, int y) {
 		super.scrollBy(x, y);
-		updateState();
+		dealScrollDistance();
 	}
 
 	@Override
@@ -380,46 +409,55 @@ public class RefreshLayout extends ViewGroup {
 		}
 	}
 
-	private void updateState() {
-		float scrollY = getScrollY();
+	private void dealScrollDistance() {
+		int scrollY = getScrollY();
 		if (scrollY == 0) {
 			if (mRefreshing) {
 				mRefreshing = false;
 			}
 			if (mLoading) {
+				if (mNoMoreData && mPullUpLoadView != null) {
+					IPullUpLoadView pullUpLoadViewInterface = (IPullUpLoadView) mPullUpLoadView;
+					pullUpLoadViewInterface.updateLoadState(IPullUpLoadView.LoadState.LOAD_NO_MORE_DATA_STATE);
+				}
 				mLoading = false;
 			}
 		} else if (scrollY < 0) {
-			//refresh
-			if (mDropDownRefreshEnable && mDropDownRefreshView != null && !mRefreshing) {
+			if (mDropDownRefreshEnable && mDropDownRefreshView != null) {
 				IDropDownRefreshView refreshViewInterface = (IDropDownRefreshView) mDropDownRefreshView;
-				if (Math.abs(scrollY) >= mDropDownRefreshView.getMeasuredHeight()) {
-					refreshViewInterface.updateRefreshState(IDropDownRefreshView.RefreshState.RELEASE_REFRESH_STATE);
-				} else {
-					refreshViewInterface.updateRefreshState(IDropDownRefreshView.RefreshState.PULL_REFRESH_STATE);
+				if (!mRefreshing) {
+					if (Math.abs(scrollY) >= refreshViewInterface.getReleaseRefreshDistance()) {
+						refreshViewInterface.updateRefreshState(IDropDownRefreshView.RefreshState.RELEASE_REFRESH_STATE);
+					} else {
+						refreshViewInterface.updateRefreshState(IDropDownRefreshView.RefreshState.PULL_REFRESH_STATE);
+					}
+					if (Math.abs(scrollY) == refreshViewInterface.getReleaseRefreshDistance() && mReadyRefreshing) {
+						mReadyRefreshing = false;
+						mRefreshing = true;
+						refreshViewInterface.updateRefreshState(IDropDownRefreshView.RefreshState.REFRESHING_STATE);
+						mOnRefreshListener.onDropDownRefresh(false);
+					}
 				}
-				if (Math.abs(scrollY) == mDropDownRefreshView.getMeasuredHeight() && mReadyRefreshing) {
-					mReadyRefreshing = false;
-					mRefreshing = true;
-					refreshViewInterface.updateRefreshState(IDropDownRefreshView.RefreshState.REFRESHING_STATE);
-					mOnRefreshListener.onDropDownRefresh(false);
-				}
+				refreshViewInterface.updateDropDownDistance(Math.abs(scrollY));
 			}
 		} else {
 			//load
 			if (mPullUpLoadEnable && mPullUpLoadView != null && !mLoading) {
 				IPullUpLoadView pullUpLoadInterface = (IPullUpLoadView) mPullUpLoadView;
-				if (Math.abs(scrollY) >= mPullUpLoadView.getMeasuredHeight()) {
-					pullUpLoadInterface.updateLoadState(IPullUpLoadView.LoadState.RELEASE_LOAD_STATE);
-				} else {
-					pullUpLoadInterface.updateLoadState(IPullUpLoadView.LoadState.PULL_LOAD_STATE);
+				if (!mNoMoreData) {
+					if (Math.abs(scrollY) >= pullUpLoadInterface.getReleaseLoadDistance()) {
+						pullUpLoadInterface.updateLoadState(IPullUpLoadView.LoadState.RELEASE_LOAD_STATE);
+					} else {
+						pullUpLoadInterface.updateLoadState(IPullUpLoadView.LoadState.PULL_LOAD_STATE);
+					}
+					if (Math.abs(scrollY) == pullUpLoadInterface.getReleaseLoadDistance() && mReadyLoading) {
+						mReadyLoading = false;
+						mLoading = true;
+						pullUpLoadInterface.updateLoadState(IPullUpLoadView.LoadState.LOADING_STATE);
+						mOnRefreshListener.onPullUpLoad(false);
+					}
 				}
-				if (Math.abs(scrollY) == mDropDownRefreshView.getMeasuredHeight() && mReadyLoading) {
-					mReadyLoading = false;
-					mLoading = true;
-					pullUpLoadInterface.updateLoadState(IPullUpLoadView.LoadState.LOADING_STATE);
-					mOnRefreshListener.onPullUpLoad(false);
-				}
+				pullUpLoadInterface.updatePullUpDistance(Math.abs(scrollY));
 			}
 		}
 	}
@@ -437,6 +475,11 @@ public class RefreshLayout extends ViewGroup {
 		}
 	}
 
+	/**
+	 * 添加下拉刷新view，child index = 0
+	 *
+	 * @param view 下拉刷新view
+	 */
 	private void addDropDownRefreshView(View view) {
 		if (mDropDownRefreshView != null) {
 			removeView(mDropDownRefreshView);
@@ -445,7 +488,11 @@ public class RefreshLayout extends ViewGroup {
 		addView(mDropDownRefreshView, 0);
 	}
 
-
+	/**
+	 * 添加上拉加载view，child index = 2
+	 *
+	 * @param view 上拉加载view
+	 */
 	private void addPullUpLoadView(View view) {
 		if (mPullUpLoadView != null) {
 			removeView(mPullUpLoadView);
@@ -477,7 +524,7 @@ public class RefreshLayout extends ViewGroup {
 	 *
 	 * @return 是否可以上拉
 	 */
-	public boolean canChildScrollUp() {
+	private boolean canChildScrollUp() {
 		if (mContentView == null) {
 			return true;
 		}
@@ -490,6 +537,22 @@ public class RefreshLayout extends ViewGroup {
 		return mContentView.canScrollVertically(1);
 	}
 
+	private boolean canOffset(int deltaY) {
+		if (deltaY >= 0 && !mDropDownRefreshEnable && getScrollY() == 0) {
+			return false;
+		}
+
+		if (deltaY <= 0 && !mPullUpLoadEnable && getScrollY() == 0) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 这里要判断是否支持上拉下拉刷新
+	 *
+	 * @param deltaY offset distance
+	 */
 	private void offset(int deltaY) {
 		scrollBy(0, -deltaY);
 	}
@@ -505,25 +568,38 @@ public class RefreshLayout extends ViewGroup {
 	 * @param yDiff 偏移距离
 	 * @return 是否是需要干扰
 	 */
-	private boolean isResetMotionEventSelf(float yDiff) {
+	private boolean shouldResetMotionEventSelf(float yDiff) {
+
+		if (!mDropDownRefreshEnable && getScrollY() == 0 && yDiff >= 0) {
+			return true;
+		}
+
+		if (!mPullUpLoadEnable) {
+
+		}
+
 		if (yDiff < 0) {
-			if (mDropDownRefreshEnable && getScrollY() < 0 && Math.abs(getScrollY()) < Math.abs(yDiff)) {
+			if (mDropDownRefreshEnable && getScrollY() < 0 && Math.abs(getScrollY()) <= Math.abs(yDiff)) {
 				return true;
 			}
 		} else {
-			if (mPullUpLoadEnable && getScrollY() > 0 && Math.abs(getScrollY()) < Math.abs(yDiff)) {
+			if (mPullUpLoadEnable && getScrollY() > 0 && Math.abs(getScrollY()) <= Math.abs(yDiff)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private boolean isResetMotionEventContent(float yDiff) {
+	private boolean shouldResetMotionEventChild(float yDiff) {
+		Log.d(TAG, "yDiff = " + yDiff);
+		//不允许上拉和下拉
 		if (yDiff <= 0) {
+			Log.d(TAG, "canChildScrollUp = " + canChildScrollUp());
 			//上滑动
 			return !canChildScrollUp();
 		} else {
 			//下滑动
+			Log.d(TAG, "canChildScrollDown = " + canChildScrollDown());
 			return !canChildScrollDown();
 		}
 	}
@@ -541,7 +617,7 @@ public class RefreshLayout extends ViewGroup {
 	 *
 	 * @param enable 是否可以下拉刷新
 	 */
-	public void setEnableRefres(boolean enable) {
+	public void setEnableRefresh(boolean enable) {
 		mDropDownRefreshEnable = enable;
 	}
 
@@ -554,8 +630,11 @@ public class RefreshLayout extends ViewGroup {
 		mPullUpLoadEnable = enable;
 	}
 
+	/**
+	 * 设置刷新完成
+	 */
 	public void setRefreshComplete() {
-		if (mRefreshing) {
+		if (mDropDownRefreshEnable && mRefreshing) {
 			IDropDownRefreshView refreshViewInterface = (IDropDownRefreshView) mDropDownRefreshView;
 			refreshViewInterface.updateRefreshState(IDropDownRefreshView.RefreshState.REFRESH_COMPLETE_STATE);
 			mScroller.startScroll(0, getScrollY(), 0, -getScrollY());
@@ -564,11 +643,36 @@ public class RefreshLayout extends ViewGroup {
 	}
 
 	public void setLoadComplete() {
-		if (mLoading) {
-			IPullUpLoadView pullUpLoadViewInterface = (IPullUpLoadView) mPullUpLoadView;
-			pullUpLoadViewInterface.updateLoadState(IPullUpLoadView.LoadState.LOAD_COMPLETE_STATE);
-			mScroller.startScroll(0, getScrollY(), 0, -getScrollY());
-			invalidate();
+		setLoadComplete(false);
+	}
+
+	/**
+	 * 设置加载完成
+	 *
+	 * @param noMoreData 是否还有更多数据
+	 */
+	public void setLoadComplete(boolean noMoreData) {
+		if (mPullUpLoadEnable) {
+			mNoMoreData = noMoreData;
+			if (mLoading) {
+				IPullUpLoadView pullUpLoadViewInterface = (IPullUpLoadView) mPullUpLoadView;
+				pullUpLoadViewInterface.updateLoadState(IPullUpLoadView.LoadState.LOAD_COMPLETE_STATE);
+				mScroller.startScroll(0, getScrollY(), 0, -getScrollY());
+				invalidate();
+			} else {
+				IPullUpLoadView pullUpLoadViewInterface = (IPullUpLoadView) mPullUpLoadView;
+				pullUpLoadViewInterface.updateLoadState(IPullUpLoadView.LoadState.LOAD_NO_MORE_DATA_STATE);
+			}
 		}
 	}
+
+	/**
+	 * 设置是否还有更多数据
+	 *
+	 * @param noMoreData 是否有更多数据
+	 */
+	public void setNoMoreData(boolean noMoreData) {
+		mNoMoreData = noMoreData;
+	}
+
 }

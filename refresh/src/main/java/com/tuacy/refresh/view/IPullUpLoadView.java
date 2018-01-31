@@ -25,7 +25,11 @@ public interface IPullUpLoadView {
 		/**
 		 * 加载完成
 		 */
-		LOAD_COMPLETE_STATE(4);
+		LOAD_COMPLETE_STATE(4),
+		/**
+		 * 没有更多数据
+		 */
+		LOAD_NO_MORE_DATA_STATE(5);
 
 		private int mState;
 
@@ -38,6 +42,25 @@ public interface IPullUpLoadView {
 		}
 	}
 
+	/**
+	 * 达到了这个距离进入加载状态
+	 *
+	 * @return 加载状态距离
+	 */
+	int getReleaseLoadDistance();
+
+	/**
+	 * 更新加载状态
+	 *
+	 * @param state 状态
+	 */
 	void updateLoadState(LoadState state);
+
+	/**
+	 * 在加载更多view显示的时候，更新显示的距离
+	 *
+	 * @param distance 距离
+	 */
+	void updatePullUpDistance(int distance);
 
 }

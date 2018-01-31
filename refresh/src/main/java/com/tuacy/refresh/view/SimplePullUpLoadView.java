@@ -14,7 +14,6 @@ public class SimplePullUpLoadView extends LinearLayout implements IPullUpLoadVie
 
 	private ProgressBar mProgressBar;
 	private TextView    mTextLoadHint;
-	private TextView    mTextClickLoad;
 	private LoadState   mState;
 
 	public SimplePullUpLoadView(Context context) {
@@ -34,7 +33,11 @@ public class SimplePullUpLoadView extends LinearLayout implements IPullUpLoadVie
 		LayoutInflater.from(getContext()).inflate(R.layout.view_pull_up_load, this, true);
 		mProgressBar = findViewById(R.id.progress_pull_up_load_progress);
 		mTextLoadHint = findViewById(R.id.text_pull_up_load_hint);
-		mTextClickLoad = findViewById(R.id.text_pull_up_load_click);
+	}
+
+	@Override
+	public int getReleaseLoadDistance() {
+		return getMeasuredHeight();
 	}
 
 	@Override
@@ -44,16 +47,41 @@ public class SimplePullUpLoadView extends LinearLayout implements IPullUpLoadVie
 		}
 		switch (state) {
 			case INITIAL_STATE:
-				break;
-			case LOADING_STATE:
+				mProgressBar.setVisibility(GONE);
+				mTextLoadHint.setVisibility(VISIBLE);
+				mTextLoadHint.setText(R.string.refresh_pull_up_load_more);
 				break;
 			case PULL_LOAD_STATE:
+				mProgressBar.setVisibility(GONE);
+				mTextLoadHint.setVisibility(VISIBLE);
+				mTextLoadHint.setText(R.string.refresh_pull_up_load_more);
 				break;
 			case RELEASE_LOAD_STATE:
+				mProgressBar.setVisibility(GONE);
+				mTextLoadHint.setVisibility(VISIBLE);
+				mTextLoadHint.setText(R.string.refresh_view_release_load_more);
+				break;
+			case LOADING_STATE:
+				mProgressBar.setVisibility(VISIBLE);
+				mTextLoadHint.setVisibility(GONE);
+				mTextLoadHint.setText(R.string.refresh_pull_up_load_more);
 				break;
 			case LOAD_COMPLETE_STATE:
+				mProgressBar.setVisibility(GONE);
+				mTextLoadHint.setVisibility(VISIBLE);
+				mTextLoadHint.setText(R.string.refresh_view_load_complete);
+				break;
+			case LOAD_NO_MORE_DATA_STATE:
+				mProgressBar.setVisibility(GONE);
+				mTextLoadHint.setVisibility(VISIBLE);
+				mTextLoadHint.setText(R.string.refresh_view_no_more_data);
 				break;
 		}
 		mState = state;
+	}
+
+	@Override
+	public void updatePullUpDistance(int distance) {
+
 	}
 }

@@ -22,6 +22,7 @@ public class ListRefreshActivity extends MobileBaseActivity {
 	private RefreshLayout   mRefreshLayout;
 	private ListView        mListRefresh;
 	private ListItemAdapter mAdapter;
+	private int             mLoadCount;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,7 @@ public class ListRefreshActivity extends MobileBaseActivity {
 
 	private void initView() {
 		mRefreshLayout = findViewById(R.id.refresh_list_view);
+		mRefreshLayout.setEnableRefresh(false);
 		mListRefresh = findViewById(R.id.list_refresh);
 	}
 
@@ -56,7 +58,8 @@ public class ListRefreshActivity extends MobileBaseActivity {
 					@Override
 					public void run() {
 						mAdapter.appendData(appendAdapterData());
-						mRefreshLayout.setLoadComplete();
+						mLoadCount++;
+						mRefreshLayout.setLoadComplete(mLoadCount == 3);
 					}
 				}, 2000);
 			}
@@ -68,18 +71,18 @@ public class ListRefreshActivity extends MobileBaseActivity {
 		mListRefresh.setAdapter(mAdapter);
 	}
 
-	private List<String> initAdapterData() {
-		List<String> list = new ArrayList<>();
+	private List<ListItemBean> initAdapterData() {
+		List<ListItemBean> list = new ArrayList<>();
 		for (int index = 0; index < 20; index++) {
-			list.add("item = " + index);
+			list.add(new ListItemBean("初始化or刷新", "item = " + index));
 		}
 		return list;
 	}
 
-	private List<String> appendAdapterData() {
-		List<String> list = new ArrayList<>();
+	private List<ListItemBean> appendAdapterData() {
+		List<ListItemBean> list = new ArrayList<>();
 		for (int index = 0; index < 5; index++) {
-			list.add("append = " + index);
+			list.add(new ListItemBean("加载更多", "item = " + index));
 		}
 		return list;
 	}

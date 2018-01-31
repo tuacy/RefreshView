@@ -39,6 +39,25 @@ public interface IDropDownRefreshView {
 		}
 	}
 
+	/**
+	 * 达到了这个距离进入刷新状态
+	 *
+	 * @return 刷新状态距离
+	 */
+	int getReleaseRefreshDistance();
+
+	/**
+	 * 更新刷新view对应的状态
+	 *
+	 * @param state 状态
+	 */
 	void updateRefreshState(RefreshState state);
+
+	/**
+	 * 更新下拉的距离
+	 *
+	 * @param distance 下拉距离
+	 */
+	void updateDropDownDistance(int distance);
 
 }

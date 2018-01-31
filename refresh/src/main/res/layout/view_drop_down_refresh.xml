@@ -2,29 +2,28 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/relative_drop_down_parent"
     android:layout_width="match_parent"
-    android:layout_height="70dp"
-    android:background="@android:color/holo_red_light"
-    android:paddingBottom="10dp">
+    android:layout_height="@dimen/refresh_item_height">
 
     <RelativeLayout
         android:id="@+id/relative_drop_down_refresh_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/refresh_progress_left"
-        android:layout_marginStart="@dimen/refresh_progress_left">
+        android:layout_marginLeft="@dimen/refresh_image_left"
+        android:layout_marginStart="@dimen/refresh_image_left">
 
         <ImageView
             android:id="@+id/image_drop_down_refresh_arrow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/refresh_image_width"
+            android:layout_height="@dimen/refresh_image_height"
+            android:scaleType="fitXY"
             android:src="@drawable/ic_drop_dow"
             android:contentDescription="@string/app_name" />
 
         <ProgressBar
             android:id="@+id/progress_drop_down_refreshing"
-            android:layout_width="@dimen/refresh_progress_width"
-            android:layout_height="@dimen/refresh_progress_height" />
+            android:layout_width="@dimen/refresh_image_width"
+            android:layout_height="@dimen/refresh_image_height" />
     </RelativeLayout>
 
     <ImageView
@@ -37,7 +36,7 @@
         android:layout_toLeftOf="@+id/relative_drop_down_refresh_right"
         android:layout_toStartOf="@+id/relative_drop_down_refresh_right"
         android:src="@drawable/ic_refresh_ok"
-        android:contentDescription="@string/app_name"/>
+        android:contentDescription="@string/app_name" />
 
     <LinearLayout
         android:id="@+id/relative_drop_down_refresh_right"
@@ -51,7 +50,9 @@
             android:id="@+id/text_drop_down_refresh_hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/refresh_view_drop_down_refresh" />
+            android:text="@string/refresh_view_drop_down_refresh"
+            android:textSize="14sp"
+            android:textColor="@color/refresh_text_color" />
 
         <TextView
             android:id="@+id/text_drop_down_refresh_time"
@@ -59,6 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="@string/refresh_view_never_refresh"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:textColor="@color/refresh_text_color" />
     </LinearLayout>
 </RelativeLayout>

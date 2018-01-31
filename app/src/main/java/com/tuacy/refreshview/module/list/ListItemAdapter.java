@@ -14,24 +14,24 @@ import java.util.List;
 
 public class ListItemAdapter extends BaseAdapter {
 
-	private List<String> mDataList;
-	private Context      mContext;
+	private List<ListItemBean> mDataList;
+	private Context            mContext;
 
 	public ListItemAdapter(Context context) {
 		this(context, null);
 	}
 
-	public ListItemAdapter(Context context, List<String> list) {
+	public ListItemAdapter(Context context, List<ListItemBean> list) {
 		mContext = context;
 		mDataList = list;
 	}
 
-	public void setData(List<String> list) {
+	public void setData(List<ListItemBean> list) {
 		mDataList = list;
 		notifyDataSetChanged();
 	}
 
-	public void appendData(List<String> list) {
+	public void appendData(List<ListItemBean> list) {
 		if (mDataList == null) {
 			mDataList = new ArrayList<>();
 		}
@@ -45,7 +45,7 @@ public class ListItemAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public String getItem(int position) {
+	public ListItemBean getItem(int position) {
 		return mDataList.get(position);
 	}
 
@@ -64,16 +64,20 @@ public class ListItemAdapter extends BaseAdapter {
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
-		holder.mTextItemName.setText(getItem(position));
+		holder.mTextMainTitle.setText(getItem(position).getMainTitle());
+		holder.mTextMainTitle.setBackgroundResource(position % 2 == 0 ? R.drawable.bg_device_even : R.drawable.bg_device_odd);
+		holder.mTextSubTitle.setText(getItem(position).getSubTitle());
 		return convertView;
 	}
 
 	static class ViewHolder {
 
-		TextView mTextItemName;
+		TextView mTextMainTitle;
+		TextView mTextSubTitle;
 
 		ViewHolder(View itemView) {
-			mTextItemName = itemView.findViewById(R.id.text_item_list_refresh);
+			mTextMainTitle = itemView.findViewById(R.id.text_item_list_main_title);
+			mTextSubTitle = itemView.findViewById(R.id.text_item_list_sub_title);
 		}
 	}
 }
