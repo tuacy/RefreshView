@@ -99,6 +99,7 @@ public class RefreshLayout extends ViewGroup {
 	 * 是否self控制范围之内
 	 */
 	private boolean                     mInControl;
+	private boolean mFlag;
 	/**
 	 * 没有更多数据
 	 */
@@ -205,8 +206,9 @@ public class RefreshLayout extends ViewGroup {
 
 	private float mInitialDownY;
 	private float mInitialDownX;
-	private float mPreviousY;
+	private float mPreviousTouchY;
 	private float mPreviousDispatchY;
+	private float mPreviousInterceptY;
 
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
@@ -220,24 +222,28 @@ public class RefreshLayout extends ViewGroup {
 			case MotionEvent.ACTION_DOWN:
 				mInitialDownX = currentX;
 				mInitialDownY = currentY;
-				mPreviousY = mInitialDownY;
+				mPreviousTouchY = mInitialDownY;
 				mPreviousDispatchY = mInitialDownY;
+				mInControl = false;
+				Log.d(TAG, "DDDDDDDDDD");
 				break;
 			case MotionEvent.ACTION_MOVE:
 				final float yDiff = currentY - mPreviousDispatchY;
-				if ((mDropDownRefreshEnable || mPullUpLoadEnable) && getScrollY() == 0 && !mInControl &&
+				if ((mDropDownRefreshEnable || mPullUpLoadEnable) && !mFlag &&
 					shouldResetMotionEventChild(yDiff)) {
 					Log.d(TAG, "child reset");
 					ev.setAction(MotionEvent.ACTION_CANCEL);
 					MotionEvent eventDown = MotionEvent.obtain(ev);
 					dispatchTouchEvent(ev);
+					mFlag = true;
 					eventDown.setAction(MotionEvent.ACTION_DOWN);
-					return onTouchEvent(eventDown);
+					return dispatchTouchEvent(eventDown);
 				}
 				mPreviousDispatchY = currentY;
 				break;
 			case MotionEvent.ACTION_CANCEL:
 			case MotionEvent.ACTION_UP:
+				mInControl = false;
 				break;
 		}
 		return super.dispatchTouchEvent(ev);
@@ -254,20 +260,23 @@ public class RefreshLayout extends ViewGroup {
 		if (mRefreshing || mLoading) {
 			return false;
 		}
+		if (mFlag) {
+			return true;
+		}
 		boolean intercept = false;
 		final int action = ev.getAction();
-		final float currentX = ev.getRawX();
 		final float currentY = ev.getRawY();
 		switch (action) {
 			case MotionEvent.ACTION_DOWN:
 				mInitialDownX = ev.getRawX();
 				mInitialDownY = ev.getRawY();
-				mPreviousY = mInitialDownY;
+				mPreviousTouchY = mInitialDownY;
+				mPreviousInterceptY = mInitialDownY;
 				break;
 			case MotionEvent.ACTION_MOVE:
-				if ((Math.abs(currentY - mInitialDownY) > mTouchSlop) &&
-					(Math.abs(currentY - mInitialDownY) > Math.abs(currentX - mInitialDownX))) {
-					if (currentY - mInitialDownY > 0) {
+				final float diffY = currentY - mPreviousInterceptY;
+				if ((Math.abs(diffY) >= mTouchSlop)) {
+					if (diffY > 0) {
 						// 下滑
 						intercept = !canChildScrollDown();
 					} else {
@@ -279,9 +288,12 @@ public class RefreshLayout extends ViewGroup {
 						mVelocityTracker.addMovement(ev);
 					}
 				}
+				mPreviousInterceptY = currentY;
 				break;
 			case MotionEvent.ACTION_CANCEL:
 			case MotionEvent.ACTION_UP:
+				mInControl = false;
+				mFlag = false;
 				recycleVelocityTracker();
 				break;
 		}
@@ -311,27 +323,29 @@ public class RefreshLayout extends ViewGroup {
 		switch (action) {
 			case MotionEvent.ACTION_DOWN:
 				mInitialDownY = event.getRawY();
-				mPreviousY = mInitialDownY;
+				mPreviousTouchY = mInitialDownY;
 				performClick();
-				mInControl = true;
 				return true;
 			case MotionEvent.ACTION_MOVE:
-				final int yDiff = (int) (currentY - mPreviousY);
-				if (Math.abs(yDiff) > mTouchSlop) {
-					final int yDiffAdapter = (int) (yDiff / mOffsetRadio);
+				final int yDiff = (int) (currentY - mPreviousTouchY);
+				final int yDiffAdapter = (int) (yDiff / mOffsetRadio);
+				if (mInControl || canStartOffset(yDiff)) {
 					if (shouldResetMotionEventSelf(yDiffAdapter)) {
+						Log.d(TAG, "SET");
 						scrollTo(0, 0);
-						event.setAction(MotionEvent.ACTION_DOWN);
-						dispatchTouchEvent(event);
-						mInControl = false;
+						MotionEvent touchEvent = MotionEvent.obtain(event);
+						touchEvent.setAction(MotionEvent.ACTION_CANCEL);
+						onTouchEvent(touchEvent);
+						MotionEvent dispatchEvent = MotionEvent.obtain(event);
+						dispatchEvent.setAction(MotionEvent.ACTION_DOWN);
+						dispatchTouchEvent(dispatchEvent);
 					} else {
-						if (canOffset(yDiffAdapter)) {
-							offset(yDiffAdapter);
-						}
 						mInControl = true;
+						offset(yDiffAdapter);
 					}
+					mFlag = false;
+					mPreviousTouchY = currentY;
 				}
-				mPreviousY = currentY;
 				break;
 			case MotionEvent.ACTION_CANCEL:
 				recycleVelocityTracker();
@@ -537,15 +551,43 @@ public class RefreshLayout extends ViewGroup {
 		return mContentView.canScrollVertically(1);
 	}
 
-	private boolean canOffset(int deltaY) {
-		if (deltaY >= 0 && !mDropDownRefreshEnable && getScrollY() == 0) {
+	/**
+	 * 判断是否可以开始滑动
+	 */
+	private boolean canStartOffset(int deltaY) {
+		if (Math.abs(deltaY) < mTouchSlop) {
 			return false;
 		}
-
-		if (deltaY <= 0 && !mPullUpLoadEnable && getScrollY() == 0) {
-			return false;
+		if (mDropDownRefreshEnable || mPullUpLoadEnable) {
+			if (!mDropDownRefreshEnable) {
+				//允许上拉加载
+				if (deltaY >= 0) {
+					if (getScrollY() >= 0) {
+						return false;
+					}
+					if (canChildScrollDown()) {
+						return false;
+					}
+					return true;
+				}
+				return true;
+			} else if (!mPullUpLoadEnable) {
+				//允许下拉加载
+				if (deltaY <= 0) {
+					if (getScrollY() <= 0) {
+						return false;
+					}
+					if (canChildScrollUp()) {
+						return false;
+					}
+					return true;
+				}
+			} else {
+				//两个都允许
+				return true;
+			}
 		}
-		return true;
+		return false;
 	}
 
 	/**
@@ -570,38 +612,45 @@ public class RefreshLayout extends ViewGroup {
 	 */
 	private boolean shouldResetMotionEventSelf(float yDiff) {
 
-		if (!mDropDownRefreshEnable && getScrollY() == 0 && yDiff >= 0) {
-			return true;
+		if (!mInControl) {
+			return false;
 		}
-
-		if (!mPullUpLoadEnable) {
-
-		}
-
-		if (yDiff < 0) {
-			if (mDropDownRefreshEnable && getScrollY() < 0 && Math.abs(getScrollY()) <= Math.abs(yDiff)) {
-				return true;
+		if (mPullUpLoadEnable || mDropDownRefreshEnable) {
+			if (yDiff < 0) {
+				if (mDropDownRefreshEnable && getScrollY() <= 0 && Math.abs(getScrollY()) <= Math.abs(yDiff)) {
+					return true;
+				}
+			} else {
+				if (mPullUpLoadEnable && getScrollY() >= 0 && Math.abs(getScrollY()) <= Math.abs(yDiff)) {
+					return true;
+				}
 			}
-		} else {
-			if (mPullUpLoadEnable && getScrollY() > 0 && Math.abs(getScrollY()) <= Math.abs(yDiff)) {
-				return true;
-			}
+			return false;
 		}
 		return false;
 	}
 
 	private boolean shouldResetMotionEventChild(float yDiff) {
-		Log.d(TAG, "yDiff = " + yDiff);
-		//不允许上拉和下拉
-		if (yDiff <= 0) {
-			Log.d(TAG, "canChildScrollUp = " + canChildScrollUp());
-			//上滑动
-			return !canChildScrollUp();
-		} else {
-			//下滑动
-			Log.d(TAG, "canChildScrollDown = " + canChildScrollDown());
-			return !canChildScrollDown();
+		if (mInControl) {
+			Log.d(TAG, "AAAAAAAAA");
+			return false;
 		}
+		if (getScrollY() != 0) {
+			return false;
+		}
+		if (Math.abs(yDiff) > mTouchSlop && (mDropDownRefreshEnable || mPullUpLoadEnable)) {
+			//不允许上拉和下拉
+			if (yDiff <= 0) {
+				Log.d(TAG, "canChildScrollUp = " + canChildScrollUp());
+				//上滑动
+				return !canChildScrollUp();
+			} else {
+				//下滑动
+				Log.d(TAG, "canChildScrollDown = " + canChildScrollDown());
+				return !canChildScrollDown();
+			}
+		}
+		return false;
 	}
 
 	public void setOnChildScrollEnableCallback(OnChildScrollEnableCallback callback) {
