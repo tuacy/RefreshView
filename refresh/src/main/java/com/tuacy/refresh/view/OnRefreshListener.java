@@ -1,6 +1,8 @@
 package com.tuacy.refresh.view;
 
-
+/**
+ * 上拉加载和下拉刷新监听类
+ */
 public interface OnRefreshListener {
 
 	/**

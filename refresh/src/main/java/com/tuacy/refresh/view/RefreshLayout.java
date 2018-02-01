@@ -84,12 +84,19 @@ public class RefreshLayout extends ViewGroup {
 	/**
 	 * 是否self在处理事件
 	 */
-	private boolean                     mInControl;
-	private boolean                     mFlag;
+	private boolean                     mInSelfControl;
+	/**
+	 * dispatchTouchEvent()函数是否可以切断事件的传递
+	 */
+	private boolean                     mDispatchCanCutMotionEvent;
 	/**
 	 * 没有更多数据
 	 */
 	private boolean                     mNoMoreData;
+	/**
+	 * Layout是否初始化完成
+	 */
+	private boolean                     mLayoutFinished;
 
 	public RefreshLayout(Context context) {
 		this(context, null);
@@ -114,6 +121,7 @@ public class RefreshLayout extends ViewGroup {
 	}
 
 	private void initData() {
+		mLayoutFinished = false;
 		//添加下拉加载对应的View
 		mDropDownRefreshView = new SimpleDropDownRefreshView(getContext());
 		addDropDownRefreshView(mDropDownRefreshView);
@@ -125,6 +133,7 @@ public class RefreshLayout extends ViewGroup {
 				//添加上拉刷新对应的View
 				mPullUpLoadView = new SimplePullUpLoadView(getContext());
 				addPullUpLoadView(mPullUpLoadView);
+				mLayoutFinished = true;
 				// 移除视图树监听器
 				getViewTreeObserver().removeOnGlobalLayoutListener(this);
 			}
@@ -205,26 +214,28 @@ public class RefreshLayout extends ViewGroup {
 				mInitialDownY = currentY;
 				mPreviousTouchY = mInitialDownY;
 				mPreviousDispatchY = mInitialDownY;
-				mInControl = false;
+				mInSelfControl = false;
 				break;
 			case MotionEvent.ACTION_MOVE:
 				final float yDiff = currentY - mPreviousDispatchY;
-				if ((mDropDownRefreshEnable || mPullUpLoadEnable) && !mFlag && shouldDispatchCutMotionEvent(yDiff)) {
+				if (!mDispatchCanCutMotionEvent && shouldDispatchCutMotionEvent(yDiff)) {
+					//先发送ACTION_CANCEL
 					ev.setAction(MotionEvent.ACTION_CANCEL);
 					MotionEvent eventDown = MotionEvent.obtain(ev);
 					dispatchTouchEvent(ev);
-					mFlag = true;
+					//再发送ACTION_DOWN，重新开始一个新的事件
+					mDispatchCanCutMotionEvent = true;
 					eventDown.setAction(MotionEvent.ACTION_DOWN);
 					return dispatchTouchEvent(eventDown);
 				}
 				mPreviousDispatchY = currentY;
 				break;
 			case MotionEvent.ACTION_CANCEL:
-				mInControl = false;
+				mInSelfControl = false;
 				break;
 			case MotionEvent.ACTION_UP:
-				mInControl = false;
-				mFlag = false;
+				mInSelfControl = false;
+				mDispatchCanCutMotionEvent = false;
 				break;
 		}
 		return super.dispatchTouchEvent(ev);
@@ -232,16 +243,20 @@ public class RefreshLayout extends ViewGroup {
 
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent ev) {
+		//不支持下拉刷新也不支持上拉加载
 		if (!mDropDownRefreshEnable && !mPullUpLoadEnable) {
 			return false;
 		}
+		//没有设置listener
 		if (mOnRefreshListener == null) {
 			return false;
 		}
+		//正在加载中或者刷新中
 		if (mRefreshing || mLoading) {
 			return false;
 		}
-		if (mFlag) {
+		//想把事件切断，重新一个新的事件
+		if (mDispatchCanCutMotionEvent && ev.getAction() == MotionEvent.ACTION_DOWN) {
 			return true;
 		}
 		boolean intercept = false;
@@ -256,14 +271,14 @@ public class RefreshLayout extends ViewGroup {
 			case MotionEvent.ACTION_MOVE:
 				final float diffY = currentY - mPreviousInterceptY;
 				if ((Math.abs(diffY) >= mTouchSlop)) {
-					intercept = interceptCheck(diffY);
+					intercept = eventShouldIntercept(diffY);
 				}
 				mPreviousInterceptY = currentY;
 				break;
 			case MotionEvent.ACTION_CANCEL:
 			case MotionEvent.ACTION_UP:
-				mInControl = false;
-				mFlag = false;
+				mInSelfControl = false;
+				mDispatchCanCutMotionEvent = false;
 				break;
 		}
 		return intercept;
@@ -276,12 +291,15 @@ public class RefreshLayout extends ViewGroup {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		//刷新中或者下拉加载中，事件不处理
 		if (mRefreshing || mLoading) {
 			return false;
 		}
+		//不支持下拉刷新也不支持上拉加载，事件不处理
 		if (!mDropDownRefreshEnable && !mPullUpLoadEnable) {
 			return false;
 		}
+		//没有设置监听，事件不处理
 		if (mOnRefreshListener == null) {
 			return false;
 		}
@@ -295,21 +313,24 @@ public class RefreshLayout extends ViewGroup {
 				return true;
 			case MotionEvent.ACTION_MOVE:
 				final int yDiff = (int) (currentY - mPreviousTouchY);
-				final int yDiffAdapter = (int) (yDiff / mOffsetRadio);
-				if (mInControl || canStartOffset(yDiff)) {
-					if (shouldResetMotionEventSelf(yDiffAdapter)) {
+				final int yDiffConvert = (int) (yDiff / mOffsetRadio);
+				if (mInSelfControl || canBeginOffset(yDiff)) {
+					if (shouldTouchCutMotionEvent(yDiffConvert)) {
+						//先恢复位置
 						scrollTo(0, 0);
+						//送出ACTION_CANCEL事件
 						MotionEvent touchEvent = MotionEvent.obtain(event);
 						touchEvent.setAction(MotionEvent.ACTION_CANCEL);
 						onTouchEvent(touchEvent);
+						//在送出ACTION_DOWN事件
 						MotionEvent dispatchEvent = MotionEvent.obtain(event);
 						dispatchEvent.setAction(MotionEvent.ACTION_DOWN);
 						dispatchTouchEvent(dispatchEvent);
 					} else {
-						mInControl = true;
-						offset(yDiffAdapter);
+						mInSelfControl = true;
+						offset(yDiffConvert);
 					}
-					mFlag = false;
+					mDispatchCanCutMotionEvent = false;
 					mPreviousTouchY = currentY;
 				}
 				break;
@@ -317,7 +338,7 @@ public class RefreshLayout extends ViewGroup {
 				if (!mScroller.isFinished()) {
 					mScroller.abortAnimation();
 				}
-				mInControl = false;
+				mInSelfControl = false;
 				break;
 			case MotionEvent.ACTION_UP:
 				int scrollOffset = getScrollY();
@@ -356,7 +377,7 @@ public class RefreshLayout extends ViewGroup {
 						}
 					}
 				}
-				mInControl = false;
+				mInSelfControl = false;
 				break;
 		}
 		return super.onTouchEvent(event);
@@ -500,43 +521,27 @@ public class RefreshLayout extends ViewGroup {
 	/**
 	 * 判断是否可以开始滑动
 	 */
-	private boolean canStartOffset(int deltaY) {
+	private boolean canBeginOffset(int deltaY) {
 		if (Math.abs(deltaY) < mTouchSlop) {
 			return false;
 		}
 		if (mDropDownRefreshEnable || mPullUpLoadEnable) {
 			if (!mDropDownRefreshEnable) {
+				//只支持上拉加载
 				if (getScrollY() == 0) {
+					//本来没有offset，还想往下拉，不行
 					return !(deltaY > 0);
 				}
-				//允许上拉加载
-				if (deltaY >= 0) {
-					if (getScrollY() > 0) {
-						return false;
-					}
-					if (canChildScrollDown()) {
-						return false;
-					}
-					return true;
-				}
-				return true;
+				return deltaY < 0 || getScrollY() <= 0 && !canChildScrollDown();
 			} else if (!mPullUpLoadEnable) {
+				//只支持下来刷新
 				if (getScrollY() == 0) {
+					//本来没有offset，还想往上拉，不行
 					return !(deltaY < 0);
 				}
-				//允许下拉加载
-				if (deltaY <= 0) {
-					if (getScrollY() < 0) {
-						return false;
-					}
-					if (canChildScrollUp()) {
-						return false;
-					}
-					return true;
-				}
-				return true;
+				return deltaY > 0 || getScrollY() >= 0 && !canChildScrollUp();
 			} else {
-				//两个都允许
+				//下拉刷新，上拉加载
 				return true;
 			}
 		}
@@ -552,24 +557,34 @@ public class RefreshLayout extends ViewGroup {
 		scrollBy(0, -deltaY);
 	}
 
-	private boolean interceptCheck(float yDiff) {
+	/**
+	 * 判断事件是否需要拦截
+	 *
+	 * @param yDiff 偏移距离
+	 * @return 是否需要拦截
+	 */
+	private boolean eventShouldIntercept(float yDiff) {
 		if (mDropDownRefreshEnable || mPullUpLoadEnable) {
 			if (!mDropDownRefreshEnable) {
-				if (getScrollY() == 0) {
-					return yDiff < 0 && !canChildScrollUp();
-				}
+				//只允许上拉加载
+				//				if (getScrollY() == 0) {
+				return yDiff < 0 && !canChildScrollUp();
+				//				}
 			} else if (!mPullUpLoadEnable) {
-				if (getScrollY() == 0) {
-					return yDiff > 0 && !canChildScrollDown();
-				}
+				//只允许下拉刷新
+				//				if (getScrollY() == 0) {
+				return yDiff > 0 && !canChildScrollDown();
+				//				}
 			} else {
-				if (yDiff > 0) {
-					// 下滑
-					return !canChildScrollDown();
-				} else {
-					// 上滑
-					return !canChildScrollUp();
-				}
+				//上拉刷新，下拉加载
+				return (yDiff > 0 && !canChildScrollDown()) || (yDiff < 0 && !canChildScrollUp());
+				//				if (yDiff > 0) {
+				//					// 下滑
+				//					return !canChildScrollDown();
+				//				} else {
+				//					// 上滑
+				//					return !canChildScrollUp();
+				//				}
 			}
 
 		}
@@ -577,22 +592,25 @@ public class RefreshLayout extends ViewGroup {
 	}
 
 	/**
-	 * 是否需要干扰事件的分发流程
+	 * 是否需要干扰事件的分发流程，事件自己的处理的时候，有的时候需要过渡到content view里面去
+	 * 1. 比如开始下拉刷新的view显示了，这个时候继续往上滑动需要把事件过渡到content view 里面去
 	 *
 	 * @param yDiff 偏移距离
 	 * @return 是否是需要干扰
 	 */
-	private boolean shouldResetMotionEventSelf(float yDiff) {
+	private boolean shouldTouchCutMotionEvent(float yDiff) {
 
-		if (!mInControl) {
+		if (!mInSelfControl) {
 			return false;
 		}
 		if (mPullUpLoadEnable || mDropDownRefreshEnable) {
 			if (yDiff < 0) {
+				//下拉刷新view显示的时候，触摸事件继续往上滑动，当滑动的距离大于scroll y的距离的时候，需要把事件过渡到content view里面去了。
 				if (mDropDownRefreshEnable && getScrollY() <= 0 && Math.abs(getScrollY()) <= Math.abs(yDiff)) {
 					return true;
 				}
 			} else {
+				//上拉加载view显示的是，触摸事件继续往下滑动，当滑动的距离大于scroll y的距离的时候，需要把事件过渡到content view里面去了。
 				if (mPullUpLoadEnable && getScrollY() >= 0 && Math.abs(getScrollY()) <= Math.abs(yDiff)) {
 					return true;
 				}
@@ -611,37 +629,56 @@ public class RefreshLayout extends ViewGroup {
 	 * @param yDiff 偏移距离
 	 */
 	private boolean shouldDispatchCutMotionEvent(float yDiff) {
-		/**
-		 * 如果当前事件在自己的控制范围之内
-		 */
-		if (mInControl) {
+		//上拉下拉都不支持
+		if (!mDropDownRefreshEnable && !mPullUpLoadEnable) {
 			return false;
 		}
+		/**
+		 * 如果当前事件还在自己的控制范围之内
+		 */
+		if (mInSelfControl) {
+			return false;
+		}
+		//getScrollY() != 0 也不用判断
 		if (getScrollY() != 0) {
 			return false;
 		}
 		if (/*Math.abs(yDiff) > mTouchSlop && */(mDropDownRefreshEnable || mPullUpLoadEnable)) {
 			if (!mDropDownRefreshEnable) {
-				return yDiff <= 0 && !canChildScrollUp();
+				//只允许上拉加载
+				return yDiff < 0 && !canChildScrollUp();
 			} else if (!mPullUpLoadEnable) {
+				//只允许下拉刷新
 				return yDiff > 0 && !canChildScrollDown();
 			} else {
-				if (yDiff <= 0) {
-					//上滑动
-					return !canChildScrollUp();
-				} else {
-					//下滑动
-					return !canChildScrollDown();
-				}
+				//即允许下拉刷新，又允许上拉加载
+				return (yDiff < 0 && !canChildScrollUp()) || (yDiff > 0 && !canChildScrollDown());
+				//				if (yDiff < 0) {
+				//					//上滑动
+				//					return !canChildScrollUp();
+				//				} else {
+				//					//下滑动
+				//					return !canChildScrollDown();
+				//				}
 			}
 		}
 		return false;
 	}
 
+	/**
+	 * 自定义是否可以上拉和下拉，会在下拉刷新view,上拉加载view显示的时候调用判断
+	 *
+	 * @param callback OnChildScrollEnableCallback
+	 */
 	public void setOnChildScrollEnableCallback(OnChildScrollEnableCallback callback) {
 		mChildScrollEnableCallback = callback;
 	}
 
+	/**
+	 * 设置下拉刷新和上拉加载的监听
+	 *
+	 * @param listener OnRefreshListener
+	 */
 	public void setOnRefreshListener(OnRefreshListener listener) {
 		mOnRefreshListener = listener;
 	}
@@ -707,6 +744,35 @@ public class RefreshLayout extends ViewGroup {
 	 */
 	public void setNoMoreData(boolean noMoreData) {
 		mNoMoreData = noMoreData;
+	}
+
+	/**
+	 * 自动刷新(下拉刷新)
+	 */
+	public void startAutoRefresh() {
+		if (!mDropDownRefreshEnable) {
+			//不允许下拉刷新，直接返回
+			return;
+		}
+		if (mDropDownRefreshView != null && !mRefreshing) {
+			if (!mLayoutFinished) {
+				post(new Runnable() {
+					@Override
+					public void run() {
+						IDropDownRefreshView refreshViewInterface = (IDropDownRefreshView) mDropDownRefreshView;
+						mScroller.startScroll(0, getScrollY(), 0, getScrollY() - refreshViewInterface.getReleaseRefreshDistance());
+						invalidate();
+						mReadyRefreshing = true;
+					}
+				});
+
+			} else {
+				IDropDownRefreshView refreshViewInterface = (IDropDownRefreshView) mDropDownRefreshView;
+				mScroller.startScroll(0, getScrollY(), 0, getScrollY() - refreshViewInterface.getReleaseRefreshDistance());
+				invalidate();
+				mReadyRefreshing = true;
+			}
+		}
 	}
 
 }
