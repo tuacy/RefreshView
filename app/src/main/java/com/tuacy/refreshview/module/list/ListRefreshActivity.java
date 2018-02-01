@@ -35,6 +35,7 @@ public class ListRefreshActivity extends MobileBaseActivity {
 
 	private void initView() {
 		mRefreshLayout = findViewById(R.id.refresh_list_view);
+		mRefreshLayout.setEnableLoad(true);
 		mRefreshLayout.setEnableRefresh(false);
 		mListRefresh = findViewById(R.id.list_refresh);
 	}
@@ -73,7 +74,7 @@ public class ListRefreshActivity extends MobileBaseActivity {
 
 	private List<ListItemBean> initAdapterData() {
 		List<ListItemBean> list = new ArrayList<>();
-		for (int index = 0; index < 20; index++) {
+		for (int index = 0; index < 4; index++) {
 			list.add(new ListItemBean("初始化or刷新", "item = " + index));
 		}
 		return list;
