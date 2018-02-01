@@ -256,9 +256,9 @@ public class RefreshLayout extends ViewGroup {
 			return false;
 		}
 		//想把事件切断，重新一个新的事件
-		if (mDispatchCanCutMotionEvent && ev.getAction() == MotionEvent.ACTION_DOWN) {
-			return true;
-		}
+//		if (mDispatchCanCutMotionEvent && ev.getAction() == MotionEvent.ACTION_DOWN) {
+//			return true;
+//		}
 		boolean intercept = false;
 		final int action = ev.getAction();
 		final float currentY = ev.getRawY();
@@ -270,9 +270,9 @@ public class RefreshLayout extends ViewGroup {
 				return false;
 			case MotionEvent.ACTION_MOVE:
 				final float diffY = currentY - mPreviousInterceptY;
-				if ((Math.abs(diffY) >= mTouchSlop)) {
+//				if ((Math.abs(diffY) >= mTouchSlop)) {
 					intercept = eventShouldIntercept(diffY);
-				}
+//				}
 				mPreviousInterceptY = currentY;
 				break;
 			case MotionEvent.ACTION_CANCEL:

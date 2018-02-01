@@ -68,7 +68,7 @@ public class RecyclerRefreshActivity extends MobileBaseActivity {
 	private void initData() {
 		mAdapter = new RecyclerRefreshAdapter(initAdapterData());
 		mRecyclerRefresh.setAdapter(mAdapter);
-		mRefreshLayout.startAutoRefresh();
+//		mRefreshLayout.startAutoRefresh();
 	}
 
 	private List<RecyclerItemBean> initAdapterData() {

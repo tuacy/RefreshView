@@ -35,8 +35,8 @@ public class ListRefreshActivity extends MobileBaseActivity {
 
 	private void initView() {
 		mRefreshLayout = findViewById(R.id.refresh_list_view);
-		mRefreshLayout.setEnableLoad(true);
-		mRefreshLayout.setEnableRefresh(false);
+		mRefreshLayout.setEnableLoad(false);
+//		mRefreshLayout.setEnableRefresh(false);
 		mListRefresh = findViewById(R.id.list_refresh);
 	}
 
