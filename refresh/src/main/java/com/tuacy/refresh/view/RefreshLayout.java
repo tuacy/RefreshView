@@ -123,7 +123,9 @@ public class RefreshLayout extends ViewGroup {
 	private void initData() {
 		mLayoutFinished = false;
 		//添加下拉加载对应的View
-		mDropDownRefreshView = new SimpleDropDownRefreshView(getContext());
+		if (mPullUpLoadView == null) {
+			mDropDownRefreshView = new SimpleDropDownRefreshView(getContext());
+		}
 		addDropDownRefreshView(mDropDownRefreshView);
 		//添加上拉加载对应的View
 		getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -131,7 +133,9 @@ public class RefreshLayout extends ViewGroup {
 			@Override
 			public void onGlobalLayout() {
 				//添加上拉刷新对应的View
-				mPullUpLoadView = new SimplePullUpLoadView(getContext());
+				if (mPullUpLoadView == null) {
+					mPullUpLoadView = new SimplePullUpLoadView(getContext());
+				}
 				addPullUpLoadView(mPullUpLoadView);
 				mLayoutFinished = true;
 				// 移除视图树监听器
@@ -217,8 +221,9 @@ public class RefreshLayout extends ViewGroup {
 				mInSelfControl = false;
 				break;
 			case MotionEvent.ACTION_MOVE:
-				final float yDiff = currentY - mPreviousDispatchY;
+				final int yDiff = (int) (currentY - mPreviousDispatchY);
 				if (!mDispatchCanCutMotionEvent && shouldDispatchCutMotionEvent(yDiff)) {
+					scrollTo(0, 0);
 					//先发送ACTION_CANCEL
 					ev.setAction(MotionEvent.ACTION_CANCEL);
 					MotionEvent eventDown = MotionEvent.obtain(ev);
@@ -256,9 +261,9 @@ public class RefreshLayout extends ViewGroup {
 			return false;
 		}
 		//想把事件切断，重新一个新的事件
-//		if (mDispatchCanCutMotionEvent && ev.getAction() == MotionEvent.ACTION_DOWN) {
-//			return true;
-//		}
+		//		if (mDispatchCanCutMotionEvent && ev.getAction() == MotionEvent.ACTION_DOWN) {
+		//			return true;
+		//		}
 		boolean intercept = false;
 		final int action = ev.getAction();
 		final float currentY = ev.getRawY();
@@ -269,10 +274,10 @@ public class RefreshLayout extends ViewGroup {
 				mPreviousInterceptY = mInitialDownY;
 				return false;
 			case MotionEvent.ACTION_MOVE:
-				final float diffY = currentY - mPreviousInterceptY;
-//				if ((Math.abs(diffY) >= mTouchSlop)) {
-					intercept = eventShouldIntercept(diffY);
-//				}
+				final int diffY = (int) (currentY - mPreviousInterceptY);
+				//				if ((Math.abs(diffY) >= mTouchSlop)) {
+				intercept = eventShouldIntercept(diffY);
+				//				}
 				mPreviousInterceptY = currentY;
 				break;
 			case MotionEvent.ACTION_CANCEL:
@@ -331,8 +336,8 @@ public class RefreshLayout extends ViewGroup {
 						offset(yDiffConvert);
 					}
 					mDispatchCanCutMotionEvent = false;
-					mPreviousTouchY = currentY;
 				}
+				mPreviousTouchY = currentY;
 				break;
 			case MotionEvent.ACTION_CANCEL:
 				if (!mScroller.isFinished()) {
@@ -522,9 +527,9 @@ public class RefreshLayout extends ViewGroup {
 	 * 判断是否可以开始滑动
 	 */
 	private boolean canBeginOffset(int deltaY) {
-		if (Math.abs(deltaY) < mTouchSlop) {
-			return false;
-		}
+		//		if (Math.abs(deltaY) < mTouchSlop) {
+		//			return false;
+		//		}
 		if (mDropDownRefreshEnable || mPullUpLoadEnable) {
 			if (!mDropDownRefreshEnable) {
 				//只支持上拉加载
@@ -601,7 +606,7 @@ public class RefreshLayout extends ViewGroup {
 	private boolean shouldTouchCutMotionEvent(float yDiff) {
 
 		if (!mInSelfControl) {
-			return false;
+			return getScrollY() == 0 && (yDiff < 0 && canChildScrollUp() || yDiff > 0 && canChildScrollDown());
 		}
 		if (mPullUpLoadEnable || mDropDownRefreshEnable) {
 			if (yDiff < 0) {
@@ -628,7 +633,7 @@ public class RefreshLayout extends ViewGroup {
 	 *
 	 * @param yDiff 偏移距离
 	 */
-	private boolean shouldDispatchCutMotionEvent(float yDiff) {
+	private boolean shouldDispatchCutMotionEvent(int yDiff) {
 		//上拉下拉都不支持
 		if (!mDropDownRefreshEnable && !mPullUpLoadEnable) {
 			return false;
@@ -773,6 +778,18 @@ public class RefreshLayout extends ViewGroup {
 				mReadyRefreshing = true;
 			}
 		}
+	}
+
+	/**
+	 * 设置下拉刷新View
+	 *
+	 * @param refreshView 下拉刷新View
+	 */
+	public void setDropDownRefreshView(View refreshView) {
+		if (!(refreshView instanceof IDropDownRefreshView)) {
+			throw new IllegalArgumentException("drop down refresh view should implements IDropDownRefreshView !!!!!!!");
+		}
+		addDropDownRefreshView(refreshView);
 	}
 
 }
