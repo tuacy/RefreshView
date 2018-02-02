@@ -63,12 +63,14 @@ public class RecyclerRefreshActivity extends MobileBaseActivity {
 				}, 2000);
 			}
 		});
+		//自定义一个下拉刷新View
+		mRefreshLayout.setDropDownRefreshView(new RecyclerRefreshView(mContext));
 	}
 
 	private void initData() {
 		mAdapter = new RecyclerRefreshAdapter(initAdapterData());
 		mRecyclerRefresh.setAdapter(mAdapter);
-//		mRefreshLayout.startAutoRefresh();
+		//		mRefreshLayout.startAutoRefresh();
 	}
 
 	private List<RecyclerItemBean> initAdapterData() {
