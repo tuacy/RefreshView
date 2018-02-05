@@ -34,6 +34,11 @@
             android:name=".module.recycler.RecyclerRefreshActivity"
             android:screenOrientation="portrait"
             android:label="RecyclerView 上拉刷新下拉加载" />
+
+        <activity
+            android:name=".module.smartrefresh.SmartRefreshTableActivity"
+            android:screenOrientation="portrait"
+            android:label="RecyclerView 上拉刷新下拉加载" />
     </application>
 
 </manifest>

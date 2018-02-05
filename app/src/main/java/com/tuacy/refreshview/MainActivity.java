@@ -6,6 +6,7 @@ import android.view.View;
 import com.tuacy.refreshview.app.base.MobileBaseActivity;
 import com.tuacy.refreshview.module.list.ListRefreshActivity;
 import com.tuacy.refreshview.module.recycler.RecyclerRefreshActivity;
+import com.tuacy.refreshview.module.smartrefresh.SmartRefreshTableActivity;
 import com.tuacy.refreshview.module.text.TextRefreshActivity;
 
 public class MainActivity extends MobileBaseActivity {
@@ -31,6 +32,13 @@ public class MainActivity extends MobileBaseActivity {
 			@Override
 			public void onClick(View v) {
 				RecyclerRefreshActivity.startUp(mContext);
+			}
+		});
+
+		findViewById(R.id.button_table_smart_refresh).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				SmartRefreshTableActivity.startUp(mContext);
 			}
 		});
 	}

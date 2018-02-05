@@ -26,4 +26,11 @@
         android:text="RecyclerView 上拉下来刷新"
         android:textAllCaps="false" />
 
+    <Button
+        android:id="@+id/button_table_smart_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Table 智能刷新"
+        android:textAllCaps="false" />
+
 </LinearLayout>
